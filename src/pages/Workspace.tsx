@@ -150,17 +150,17 @@ export default function Workspace() {
 
       <div className="flex items-center space-x-2">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-primary" />
           <Input
             placeholder="Search PDNs..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8"
+            className="pl-8 border-primary/20 focus:border-primary"
           />
         </div>
       </div>
 
-      <div className="border rounded-lg">
+      <div className="border rounded-lg shadow-colorful overflow-hidden bg-gradient-card backdrop-blur-sm">
         <Table>
           <TableHeader>
             <TableRow>
@@ -193,7 +193,7 @@ export default function Workspace() {
                 <TableCell>
                   <Link 
                     to={`/pdn/${pdn.id}`}
-                    className="font-medium text-primary hover:underline"
+                    className="font-medium text-primary hover:text-primary-glow hover:underline transition-colors"
                   >
                     {pdn.id}
                   </Link>

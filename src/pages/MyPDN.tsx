@@ -177,7 +177,7 @@ export default function MyPDN() {
             />
           </div>
         </div>
-        <Button asChild>
+        <Button asChild variant="gradient">
           <Link to="/new-pdn">Create New PDN</Link>
         </Button>
       </div>

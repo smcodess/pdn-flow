@@ -224,7 +224,7 @@ export default function NewPDN() {
             </div>
 
             <div className="flex space-x-4 pt-4">
-              <Button type="submit" className="flex-1">
+              <Button type="submit" variant="gradient" className="flex-1">
                 Save PDN
               </Button>
               <Button type="button" variant="outline" onClick={handleReset} className="flex-1">

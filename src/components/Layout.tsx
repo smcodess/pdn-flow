@@ -59,9 +59,9 @@ export function Layout() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
       {/* Header */}
-      <header className="border-b bg-card">
+      <header className="border-b bg-gradient-card backdrop-blur-sm shadow-sm">
         <div className="flex h-16 items-center px-4">
           {/* Mobile Sidebar Toggle */}
           <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
@@ -75,8 +75,8 @@ export function Layout() {
                 <h3 className="font-semibold text-sm text-muted-foreground mb-4">Git Repositories</h3>
                 <div className="space-y-2">
                   {gitRepositories.map((repo) => (
-                    <div key={repo} className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted cursor-pointer">
-                      <GitBranch className="h-4 w-4 text-muted-foreground" />
+                    <div key={repo} className="flex items-center space-x-2 p-2 rounded-md hover:bg-gradient-accent hover:text-accent-foreground cursor-pointer transition-all duration-200">
+                      <GitBranch className="h-4 w-4" />
                       <span className="text-sm">{repo}</span>
                     </div>
                   ))}
@@ -87,16 +87,16 @@ export function Layout() {
 
           {/* Logo */}
           <div className="flex items-center space-x-4">
-            <h1 className="text-xl font-bold">JTRAC</h1>
+            <h1 className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">JTRAC</h1>
           </div>
 
           {/* Navigation Tabs */}
           <div className="flex-1 flex justify-center">
             <Tabs value={getActiveTab()} onValueChange={handleTabChange} className="w-auto">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="workspace">My Workspace</TabsTrigger>
-                <TabsTrigger value="new-pdn">New PDN</TabsTrigger>
-                <TabsTrigger value="my-pdn">My PDN</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-3 bg-gradient-card shadow-sm">
+                <TabsTrigger value="workspace" className="data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground">My Workspace</TabsTrigger>
+                <TabsTrigger value="new-pdn" className="data-[state=active]:bg-gradient-accent data-[state=active]:text-accent-foreground">New PDN</TabsTrigger>
+                <TabsTrigger value="my-pdn" className="data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground">My PDN</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
@@ -107,6 +107,7 @@ export function Layout() {
               variant="ghost"
               size="icon"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="hover:bg-gradient-primary hover:text-primary-foreground"
             >
               <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
               <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
@@ -114,19 +115,19 @@ export function Layout() {
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full hover:bg-gradient-accent hover:text-accent-foreground">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src="/placeholder.svg" alt="User" />
-                    <AvatarFallback>JD</AvatarFallback>
+                    <AvatarFallback className="bg-gradient-primary text-primary-foreground">JD</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuItem className="cursor-pointer">
+              <DropdownMenuContent className="w-56 bg-gradient-card shadow-colorful" align="end" forceMount>
+                <DropdownMenuItem className="cursor-pointer hover:bg-gradient-primary hover:text-primary-foreground">
                   <User className="mr-2 h-4 w-4" />
                   Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer">
+                <DropdownMenuItem className="cursor-pointer hover:bg-gradient-accent hover:text-accent-foreground">
                   <LogOut className="mr-2 h-4 w-4" />
                   Logout
                 </DropdownMenuItem>
@@ -138,18 +139,18 @@ export function Layout() {
 
       <div className="flex">
         {/* Desktop Sidebar */}
-        <aside className="hidden lg:flex w-64 border-r bg-card flex-col">
+        <aside className="hidden lg:flex w-64 border-r bg-gradient-card backdrop-blur-sm flex-col shadow-sm">
           <div className="p-4">
             <div className="flex items-center space-x-2 mb-4">
-              <Search className="h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search repositories..." className="h-8" />
+              <Search className="h-4 w-4 text-primary" />
+              <Input placeholder="Search repositories..." className="h-8 border-primary/20 focus:border-primary" />
             </div>
-            <h3 className="font-semibold text-sm text-muted-foreground mb-4">Git Repositories</h3>
+            <h3 className="font-semibold text-sm bg-gradient-accent bg-clip-text text-transparent mb-4">Git Repositories</h3>
             <div className="space-y-2">
               {gitRepositories.map((repo) => (
-                <div key={repo} className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted cursor-pointer transition-colors">
-                  <GitBranch className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">{repo}</span>
+                <div key={repo} className="flex items-center space-x-2 p-3 rounded-lg hover:bg-gradient-primary hover:text-primary-foreground cursor-pointer transition-all duration-200 hover:shadow-colorful group">
+                  <GitBranch className="h-4 w-4 text-accent group-hover:text-primary-foreground" />
+                  <span className="text-sm font-medium">{repo}</span>
                 </div>
               ))}
             </div>
