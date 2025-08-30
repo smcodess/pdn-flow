@@ -20,7 +20,7 @@ import {
   GitBranch,
   Search
 } from "lucide-react";
-import { useTheme } from "next-themes";
+import { useTheme } from "@/providers/ThemeProvider";
 
 const gitRepositories = [
   "frontend-app",
