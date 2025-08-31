@@ -26,53 +26,7 @@ interface MyPDN {
   priority: "Low" | "Medium" | "High" | "Critical";
 }
 
-const mockMyPDNs: MyPDN[] = [
-  {
-    id: "PDN-006",
-    description: "Implement two-factor authentication for user accounts",
-    status: "Submitted",
-    assignedTo: "Security Team",
-    dateCreated: "2024-01-16",
-    lastUpdated: "2024-01-17",
-    priority: "High"
-  },
-  {
-    id: "PDN-007",
-    description: "Optimize database queries for better performance",
-    status: "In Review", 
-    assignedTo: "DB Team",
-    dateCreated: "2024-01-15",
-    lastUpdated: "2024-01-16",
-    priority: "Medium"
-  },
-  {
-    id: "PDN-008",
-    description: "Add export functionality to reports dashboard",
-    status: "Approved",
-    assignedTo: "Frontend Team",
-    dateCreated: "2024-01-14",
-    lastUpdated: "2024-01-15",
-    priority: "Low"
-  },
-  {
-    id: "PDN-009",
-    description: "Fix memory leak in background processing service",
-    status: "Draft",
-    assignedTo: "Not Assigned",
-    dateCreated: "2024-01-13",
-    lastUpdated: "2024-01-13",
-    priority: "Critical"
-  },
-  {
-    id: "PDN-010",
-    description: "Update API documentation for new endpoints",
-    status: "Rejected",
-    assignedTo: "Documentation Team", 
-    dateCreated: "2024-01-12",
-    lastUpdated: "2024-01-14",
-    priority: "Low"
-  }
-];
+const myPDNs: MyPDN[] = [];
 
 const getStatusVariant = (status: string) => {
   switch (status) {
@@ -123,7 +77,7 @@ export default function MyPDN() {
   };
 
   const filteredAndSortedPDNs = useMemo(() => {
-    let filtered = mockMyPDNs.filter(pdn => 
+    let filtered = myPDNs.filter(pdn => 
       pdn.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       pdn.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       pdn.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -212,7 +166,7 @@ export default function MyPDN() {
               <TableRow key={pdn.id}>
                 <TableCell>
                   <Link 
-                    to={`/pdn/${pdn.id}`}
+                    to={`/app/pdn/${pdn.id}`}
                     className="font-medium text-primary hover:underline"
                   >
                     {pdn.id}

@@ -142,7 +142,8 @@ export default function ViewPDN() {
       {/* Header */}
       <div className="flex items-center space-x-4">
         <Button variant="ghost" size="icon" asChild>
-          <Link to="/workspace">
+          <Link to="/app/workspace">        
+          {/* Need to change it to either workspace or my PDN wherever it came from */}
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>

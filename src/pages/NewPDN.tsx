@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,58 +7,89 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { sendApiRequest } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 interface PDNFormData {
-  description: string;
-  problemStatement: string;
+  description: string,
+  createdBy: number;
+  problemSource: string;
+  problemId: string;
   workspace: string;
-  components: string;
-  defectId: string;
-  defectType: string;
-  moduleImpacted: string;
-  subModuleImpacted: string;
+  module: string;
+  subModule: string;
+  product: string;
+  impactedArea: string;
+  component: string;
 }
 
-const workspaces = ["Frontend Development", "Backend Services", "Mobile App", "Data Platform", "Infrastructure"];
-const defectTypes = ["Bug", "Enhancement", "Performance", "Security", "Documentation"];
-const modules = ["Authentication", "User Management", "Reporting", "API Gateway", "Database"];
+const workspaces = ["IM", "DELL", "PL"];
+const defectTypes = ["IM", "CR"];
+const modules = ["Policy", "Claim"];
 
 export default function NewPDN() {
   const { toast } = useToast();
-  const [generatedId] = useState(`PDN-${Date.now().toString().slice(-6)}`);
-  
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [createdPDN, setCreatedPDN] = useState<any>(null);
+  const navigate = useNavigate();
+
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<PDNFormData>({
     defaultValues: {
       description: "",
-      problemStatement: "",
+      createdBy: null,
+      problemSource: "",
+      problemId: "",
       workspace: "",
-      components: "",
-      defectId: "",
-      defectType: "",
-      moduleImpacted: "",
-      subModuleImpacted: ""
+      module: "",
+      subModule: "",
+      product: "",
+      impactedArea: "",
+      component: ""
     }
   });
 
-  const selectedModule = watch("moduleImpacted");
+  const selectedModule = watch("impactedArea");
   const getSubModules = (module: string) => {
     const subModuleMap: Record<string, string[]> = {
-      "Authentication": ["OAuth", "JWT", "Session Management", "Password Reset"],
-      "User Management": ["User Profiles", "Permissions", "Roles", "Account Settings"],
-      "Reporting": ["Dashboard", "Analytics", "Export", "Scheduling"],
-      "API Gateway": ["Routing", "Rate Limiting", "Authentication", "Logging"],
-      "Database": ["Queries", "Migrations", "Backup", "Performance"]
+      "Policy": ["OAuth", "JWT", "Session Management", "Password Reset"],
+      "Claim": ["User Profiles", "Permissions", "Roles", "Account Settings"],
     };
     return subModuleMap[module] || [];
   };
 
-  const onSubmit = (data: PDNFormData) => {
-    console.log("Submitting PDN:", { id: generatedId, ...data });
-    toast({
-      title: "PDN Created Successfully",
-      description: `PDN ${generatedId} has been created and submitted for review.`,
-    });
-    reset();
+  const onSubmit = async (data: PDNFormData) => {
+    try {
+      setIsSubmitting(true);
+
+      const requestData = {
+        ...data,
+        eventCode: "CREATE_PDN",
+        createdBy: 2732290
+      };
+
+      const response = await sendApiRequest('http://localhost:8080/api/pdn/create', requestData, { method: "POST" });
+
+      setCreatedPDN(response);
+      console.log("PDN Created:", response);
+
+      toast({
+        title: "PDN Created Successfully",
+        description: `PDN ${response.id} has been created and submitted for review.`,
+      });
+
+      navigate(`/pdn/PDN-002`);
+      // navigate(`/pdn/${response.id}`);
+
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create PDN. Please try again.",
+        variant: "destructive",
+      });
+      console.error("Error creating PDN:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleReset = () => {
@@ -78,11 +109,8 @@ export default function NewPDN() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center space-x-4">
-            <span>PDN Details</span>
-            <div className="text-sm font-mono bg-muted px-3 py-1 rounded">
-              ID: {generatedId}
-            </div>
+          <CardTitle>
+            PDN Details
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -102,15 +130,15 @@ export default function NewPDN() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="problemStatement">Problem Statement/ID *</Label>
+                <Label htmlFor="problemId">Problem Statement/ID *</Label>
                 <Textarea
-                  id="problemStatement"
+                  id="problemId"
                   placeholder="Detailed problem statement or reference ID..."
                   className="min-h-[100px]"
-                  {...register("problemStatement", { required: "Problem statement is required" })}
+                  {...register("problemId", { required: "Problem statement is required" })}
                 />
-                {errors.problemStatement && (
-                  <p className="text-sm text-destructive">{errors.problemStatement.message}</p>
+                {errors.problemId && (
+                  <p className="text-sm text-destructive">{errors.problemId.message}</p>
                 )}
               </div>
             </div>
@@ -136,11 +164,11 @@ export default function NewPDN() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="defectId">Defect ID</Label>
+                <Label htmlFor="problemId">Defect ID</Label>
                 <Input
-                  id="defectId"
+                  id="problemId"
                   placeholder="e.g., DEF-12345"
-                  {...register("defectId")}
+                  {...register("problemId")}
                 />
               </div>
             </div>
@@ -151,10 +179,10 @@ export default function NewPDN() {
                 id="components"
                 placeholder="List file paths of components that need changes (one per line)..."
                 className="min-h-[120px] font-mono text-sm"
-                {...register("components", { required: "Components list is required" })}
+                {...register("component", { required: "Components list is required" })}
               />
-              {errors.components && (
-                <p className="text-sm text-destructive">{errors.components.message}</p>
+              {errors.component && (
+                <p className="text-sm text-destructive">{errors.component.message}</p>
               )}
               <p className="text-xs text-muted-foreground">
                 Example: src/components/Login.tsx, src/utils/auth.js, config/database.yml
@@ -163,8 +191,8 @@ export default function NewPDN() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="defectType">Defect Type *</Label>
-                <Select onValueChange={(value) => setValue("defectType", value)}>
+                <Label htmlFor="problemSource">Defect Type *</Label>
+                <Select onValueChange={(value) => setValue("problemSource", value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
@@ -176,14 +204,14 @@ export default function NewPDN() {
                     ))}
                   </SelectContent>
                 </Select>
-                {errors.defectType && (
-                  <p className="text-sm text-destructive">{errors.defectType.message}</p>
+                {errors.problemSource && (
+                  <p className="text-sm text-destructive">{errors.problemSource.message}</p>
                 )}
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="moduleImpacted">Module Impacted *</Label>
-                <Select onValueChange={(value) => setValue("moduleImpacted", value)}>
+                <Select onValueChange={(value) => setValue("impactedArea", value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select module" />
                   </SelectTrigger>
@@ -195,15 +223,15 @@ export default function NewPDN() {
                     ))}
                   </SelectContent>
                 </Select>
-                {errors.moduleImpacted && (
-                  <p className="text-sm text-destructive">{errors.moduleImpacted.message}</p>
+                {errors.impactedArea && (
+                  <p className="text-sm text-destructive">{errors.impactedArea.message}</p>
                 )}
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="subModuleImpacted">Sub Module Impacted *</Label>
-                <Select 
-                  onValueChange={(value) => setValue("subModuleImpacted", value)}
+                <Select
+                  onValueChange={(value) => setValue("subModule", value)}
                   disabled={!selectedModule}
                 >
                   <SelectTrigger>
@@ -217,15 +245,15 @@ export default function NewPDN() {
                     ))}
                   </SelectContent>
                 </Select>
-                {errors.subModuleImpacted && (
-                  <p className="text-sm text-destructive">{errors.subModuleImpacted.message}</p>
+                {errors.subModule && (
+                  <p className="text-sm text-destructive">{errors.subModule.message}</p>
                 )}
               </div>
             </div>
 
             <div className="flex space-x-4 pt-4">
-              <Button type="submit" variant="gradient" className="flex-1">
-                Save PDN
+              <Button type="submit" variant="gradient" className="flex-1" disabled={isSubmitting}>
+                {isSubmitting ? "Creating PDN..." : "Save PDN"}
               </Button>
               <Button type="button" variant="outline" onClick={handleReset} className="flex-1">
                 Reset Form

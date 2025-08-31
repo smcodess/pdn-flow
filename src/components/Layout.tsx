@@ -5,31 +5,36 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { 
-  User, 
-  LogOut, 
-  Menu, 
-  Moon, 
-  Sun, 
+import {
+  User,
+  LogOut,
+  Menu,
+  Moon,
+  Sun,
   GitBranch,
   Search
 } from "lucide-react";
 import { useTheme } from "@/providers/ThemeProvider";
+import { sendApiRequest } from "@/lib/utils";
 
-const gitRepositories = [
-  "frontend-app",
-  "backend-services", 
-  "mobile-client",
-  "data-pipeline",
-  "auth-service",
-  "notification-service"
-];
+
+const gitRepositories = ["IM-GIT", "PL-GIT", "DELL-GIT"];
+
+export async function fetchFiles(gitFetchURL: string): Promise<any[]> {
+  try {
+    const data = await sendApiRequest(gitFetchURL, {}, { method: 'GET' })
+    return data
+  } catch (error) {
+    console.error('Failed to fetch files:', error)
+    throw error
+  }
+}
 
 export function Layout() {
   const location = useLocation();
@@ -38,22 +43,24 @@ export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const getActiveTab = () => {
-    if (location.pathname === "/" || location.pathname === "/workspace") return "workspace";
-    if (location.pathname === "/new-pdn") return "new-pdn";
-    if (location.pathname === "/my-pdn") return "my-pdn";
-    return "workspace";
+    if (location.pathname.startsWith("/pdn/")) return "";
+
+    if (location.pathname === "/app/workspace") return "workspace";
+    if (location.pathname === "/app/new-pdn") return "new-pdn";
+    if (location.pathname === "/app/my-pdn") return "my-pdn";
+    return "";
   };
 
   const handleTabChange = (value: string) => {
     switch (value) {
       case "workspace":
-        navigate("/workspace");
+        navigate("/app/workspace");
         break;
       case "new-pdn":
-        navigate("/new-pdn");
+        navigate("/app/new-pdn");
         break;
       case "my-pdn":
-        navigate("/my-pdn");
+        navigate("/app/my-pdn");
         break;
     }
   };
@@ -112,7 +119,7 @@ export function Layout() {
               <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
               <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
             </Button>
-            
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full hover:bg-gradient-accent hover:text-accent-foreground">

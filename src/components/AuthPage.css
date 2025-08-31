@@ -1,0 +1,45 @@
+/* Auth Page Specific Animations */
+@keyframes slide-fade-in {
+  0% { 
+    transform: translateX(30px) scale(0.95); 
+    opacity: 0; 
+  }
+  100% { 
+    transform: translateX(0) scale(1); 
+    opacity: 1; 
+  }
+}
+
+@keyframes slide-fade-out {
+  0% { 
+    transform: translateX(0) scale(1); 
+    opacity: 1; 
+  }
+  100% { 
+    transform: translateX(-30px) scale(0.95); 
+    opacity: 0; 
+  }
+}
+
+@keyframes fade-in {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Animation Classes */
+.animate-slide-fade-in {
+  animation: slide-fade-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.animate-slide-fade-out {
+  animation: slide-fade-out 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out;
+}
+
+/* Utility Classes */
+.smooth-transition {
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
