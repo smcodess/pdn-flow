@@ -102,3 +102,24 @@ export const validateSignupForm = (data: SignupFormValues) => {
     errors,
   };
 };
+
+// utils/validation.ts (add this function)
+export const validateSigninForm = (data: {
+  email: string;
+  password: string;
+}) => {
+  const errors: Partial<Record<keyof typeof data, string>> = {};
+
+  if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+    errors.email = "Please enter a valid email address";
+  }
+
+  if (!data.password || data.password.length < 1) {
+    errors.password = "Password is required";
+  }
+
+  return {
+    isValid: Object.keys(errors).length === 0,
+    errors,
+  };
+};

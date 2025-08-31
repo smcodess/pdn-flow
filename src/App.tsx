@@ -13,6 +13,7 @@ import NotFound from "./pages/NotFound";
 import { useState } from "react";
 import Index from "./pages/Index";
 import { AuthPage } from "./components/AuthPage";
+import GitPDN from "./pages/GitPDN";
 
 const queryClient = new QueryClient();
 
@@ -30,7 +31,7 @@ interface AuthResponse {
 }
 
 const App = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<AuthResponse['user'] | null>(null);
 
   const login = (authData: AuthResponse) => {
@@ -50,7 +51,7 @@ const App = () => {
     if (!isAuthenticated) {
       return <Navigate to="/" replace />;
     }
-    return <Layout/>;
+    return <Layout />;
   };
 
   return (
@@ -65,9 +66,10 @@ const App = () => {
               <Route path="/signup" element={<AuthPage onLogin={login} />} />
 
               <Route path="/app" element={<ProtectedLayout />}>
+                <Route path="git/:gitRepo" element={<GitPDN/>} />
                 <Route path="workspace" element={<Workspace />} />
                 <Route path="new-pdn" element={<NewPDN />} />
-                <Route path="my-pdn" element={<MyPDN />} />
+                <Route path="my-pdn" element={<MyPDN user={user} />} />
                 <Route path="pdn/:id" element={<ViewPDN />} />
               </Route>
               <Route path="*" element={<NotFound />} />

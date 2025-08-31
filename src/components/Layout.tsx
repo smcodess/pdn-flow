@@ -82,10 +82,15 @@ export function Layout() {
                 <h3 className="font-semibold text-sm text-muted-foreground mb-4">Git Repositories</h3>
                 <div className="space-y-2">
                   {gitRepositories.map((repo) => (
-                    <div key={repo} className="flex items-center space-x-2 p-2 rounded-md hover:bg-gradient-accent hover:text-accent-foreground cursor-pointer transition-all duration-200">
+                    <Link
+                      key={repo}
+                      to={`/app/git/${repo}`}
+                      className="flex items-center space-x-2 p-2 rounded-md hover:bg-gradient-accent hover:text-accent-foreground cursor-pointer transition-all duration-200"
+                      onClick={() => setSidebarOpen(false)} // Close mobile sidebar on click
+                    >
                       <GitBranch className="h-4 w-4" />
                       <span className="text-sm">{repo}</span>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               </div>
@@ -155,10 +160,14 @@ export function Layout() {
             <h3 className="font-semibold text-sm bg-gradient-accent bg-clip-text text-transparent mb-4">Git Repositories</h3>
             <div className="space-y-2">
               {gitRepositories.map((repo) => (
-                <div key={repo} className="flex items-center space-x-2 p-3 rounded-lg hover:bg-gradient-primary hover:text-primary-foreground cursor-pointer transition-all duration-200 hover:shadow-colorful group">
+                <Link
+                  key={repo}
+                  to={`/app/git/${repo}`}
+                  className="flex items-center space-x-2 p-3 rounded-lg hover:bg-gradient-primary hover:text-primary-foreground cursor-pointer transition-all duration-200 hover:shadow-colorful group"
+                >
                   <GitBranch className="h-4 w-4 text-accent group-hover:text-primary-foreground" />
                   <span className="text-sm font-medium">{repo}</span>
-                </div>
+                </Link>
               ))}
             </div>
           </div>

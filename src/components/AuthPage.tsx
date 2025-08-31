@@ -86,12 +86,12 @@ export const AuthPage = ({ onLogin }: AuthPageProps) => {
                             <CardContent className="p-8">
                                 <div
                                     className={`transition-all duration-300 ${isTransitioning
-                                            ? 'animate-slide-fade-out'
-                                            : 'animate-slide-fade-in'
+                                        ? 'animate-slide-fade-out'
+                                        : 'animate-slide-fade-in'
                                         }`}
                                 >
                                     {!isSignUp ? (
-                                        <SignInForm onSwitchToSignUp={handleSwitch} />
+                                        <SignInForm onSwitchToSignUp={handleSwitch} onLogin={onLogin} />
                                     ) : (
                                         <SignUpForm onSwitchToSignIn={handleSwitch} onLogin={onLogin} />
                                     )}

@@ -15,7 +15,7 @@ import { Search, ArrowUpDown } from "lucide-react";
 import { sendApiRequest } from "@/lib/utils";
 import { ClimbingBoxLoader } from 'react-spinners';
 
-type SortField = "id" | "description" | "status" | "createdBy" | "assignedTo" | "dateCreated" | "gitRepo";
+type SortField = "pdnId" | "description" | "currentStatus" | "createdByFirstName" | "currentOwnerFirstName" | "createdDate" | "workspace";
 type SortDirection = "asc" | "desc";
 
 interface PDN {
@@ -45,7 +45,7 @@ const getStatusVariant = (status: string) => {
 
 export default function Workspace() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortField, setSortField] = useState<SortField>("dateCreated");
+  const [sortField, setSortField] = useState<SortField>("createdDate");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [PDNList, setPDNList] = useState<PDN[]>([]);
   const [loading, setLoading] = useState(true);
@@ -86,7 +86,7 @@ export default function Workspace() {
 
     let filtered = PDNList.filter(pdn =>
       pdn.pdnId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      // pdn.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      pdn.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       pdn.currentStatus.toLowerCase().includes(searchTerm.toLowerCase()) ||
       pdn.createdByFirstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       pdn.currentOwnerFirstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -97,7 +97,7 @@ export default function Workspace() {
       let aValue: any = a[sortField];
       let bValue: any = b[sortField];
 
-      if (sortField === "dateCreated") {
+      if (sortField === "createdDate") {
         aValue = new Date(aValue).getTime();
         bValue = new Date(bValue).getTime();
       }
@@ -151,25 +151,25 @@ export default function Workspace() {
               <TableHeader>
                 <TableRow>
                   <TableHead>
-                    <SortButton field="id">PDN ID</SortButton>
+                    <SortButton field="pdnId">PDN ID</SortButton>
                   </TableHead>
                   <TableHead>
                     <SortButton field="description">Description</SortButton>
                   </TableHead>
                   <TableHead>
-                    <SortButton field="status">Status</SortButton>
+                    <SortButton field="currentStatus">Status</SortButton>
                   </TableHead>
                   <TableHead>
-                    <SortButton field="createdBy">Created By</SortButton>
+                    <SortButton field="createdByFirstName">Created By</SortButton>
                   </TableHead>
                   <TableHead>
-                    <SortButton field="assignedTo">Assigned To</SortButton>
+                    <SortButton field="currentOwnerFirstName">Assigned To</SortButton>
                   </TableHead>
                   <TableHead>
-                    <SortButton field="dateCreated">Date Created</SortButton>
+                    <SortButton field="createdDate">Date Created</SortButton>
                   </TableHead>
                   <TableHead>
-                    <SortButton field="gitRepo">Git Repo</SortButton>
+                    <SortButton field="workspace">Git Repo</SortButton>
                   </TableHead>
                 </TableRow>
               </TableHeader>

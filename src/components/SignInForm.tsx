@@ -8,19 +8,37 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { sendApiRequest, validateSigninForm } from "@/lib/utils";
 
 const signInSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(1, "Password is required"),
 });
 
-type SignInFormValues = z.infer<typeof signInSchema>;
+interface SignInFormValues {
+  email: string;
+  password: string;
+}
+
+interface AuthResponse {
+  success: boolean;
+  user: {
+    id: number;
+    employeeId: string;
+    fullName: string;
+    email: string;
+    department: string;
+  };
+  token?: string;
+  message: string;
+}
 
 interface SignInFormProps {
   onSwitchToSignUp: () => void;
+  onLogin: (authData: AuthResponse) => void;
 }
 
-export const SignInForm = ({ onSwitchToSignUp }: SignInFormProps) => {
+export const SignInForm = ({ onSwitchToSignUp, onLogin }: SignInFormProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -29,23 +47,61 @@ export const SignInForm = ({ onSwitchToSignUp }: SignInFormProps) => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<SignInFormValues>({
-    resolver: zodResolver(signInSchema),
-  });
+    setError
+  } = useForm<SignInFormValues>();
 
   const onSubmit = async (data: SignInFormValues) => {
-    setIsLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      setIsLoading(true);
 
-    toast({
-      title: "Welcome back!",
-      description: `Successfully signed in to JTRAC.`,
-    });
+      const validation = validateSigninForm(data);
 
-    navigate('/app/');
+      if (!validation.isValid) {
+        Object.entries(validation.errors).forEach(([field, message]) => {
+          setError(field as keyof SignInFormValues, { message });
+        });
+        return;
+      }
 
-    setIsLoading(false);
+      // const response: AuthResponse = await sendApiRequest(
+      //   'http://localhost:8080/api/auth/signin',
+      //   data,
+      //   { method: "POST" } 
+      // );
+
+      const response = {
+        success: true,
+        user: {
+          id: 123,
+          employeeId: "2732290",
+          fullName: "Satwik Mishra",
+          email: "mishra.satwik@tcs.com",
+          department: "Developer"
+        },
+        token: "Something",
+        message: "success"
+      };
+
+      if (response.success) {
+        onLogin(response);
+        toast({
+          title: "Welcome back!",
+          description: `Successfully signed in to JTRAC.`,
+        });
+        navigate('/app/workspace');
+      } else {
+        throw new Error(response.message);
+      }
+
+    } catch (error) {
+      toast({
+        title: "Sign in failed",
+        description: error.message || "Please check your credentials and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -12,18 +12,32 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Search, ArrowUpDown } from "lucide-react";
+import { sendApiRequest } from "@/lib/utils";
+import { ClimbingBoxLoader } from "react-spinners";
 
-type SortField = "id" | "description" | "status" | "assignedTo" | "dateCreated" | "lastUpdated";
+type SortField = "pdnId" | "description" | "currentStatus" | "currentOwnerFirstName" | "createdDate" | "workspace" | "updatedDate";
 type SortDirection = "asc" | "desc";
 
+interface MyPDNProps {
+  user: {
+    id: number;
+    employeeId: string;
+    fullName: string;
+    email: string;
+    department: string;
+  } | null;
+}
+
 interface MyPDN {
-  id: string;
+  pdnId: string;
   description: string;
-  status: "Draft" | "Submitted" | "In Review" | "Approved" | "Rejected" | "Closed";
-  assignedTo: string;
-  dateCreated: string;
-  lastUpdated: string;
-  priority: "Low" | "Medium" | "High" | "Critical";
+  currentStatus: "Open" | "In Progress" | "Resolved" | "Closed";
+  createdByFirstName: string;
+  currentOwnerFirstName: string;
+  createdDate: string;
+  workspace: string;
+  priority?: string;        // Add this
+  updatedDate?: string;     // Add this
 }
 
 const myPDNs: MyPDN[] = [];
@@ -36,7 +50,7 @@ const getStatusVariant = (status: string) => {
       return "default";
     case "In Review":
       return "outline";
-    case "Approved": 
+    case "Approved":
       return "secondary";
     case "Rejected":
       return "destructive";
@@ -62,10 +76,45 @@ const getPriorityVariant = (priority: string) => {
   }
 };
 
-export default function MyPDN() {
+export default function MyPDN({ user }: MyPDNProps) {
+  console.log(user);
+
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortField, setSortField] = useState<SortField>("lastUpdated");
+  const [sortField, setSortField] = useState<SortField>("updatedDate");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const [myPDNs, setMyPDNs] = useState<MyPDN[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchUserPDNs = async () => {
+      if (!user?.id) return;
+
+      try {
+        setIsLoading(true);
+
+        const response = await sendApiRequest(
+          `http://localhost:8080/api/pdn/all/createdBy/${user.employeeId}`,
+          null,
+          { method: "GET" }
+        );
+
+        console.log(response);
+
+        if (response.data && response.data.length > 0) {
+          setMyPDNs(response.data);
+        } else {
+          setMyPDNs([]); // Set empty array if no data
+        }
+      } catch (error) {
+        console.error('Failed to fetch PDNs:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserPDNs();
+  }, [user?.employeeId]);
+
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -77,29 +126,52 @@ export default function MyPDN() {
   };
 
   const filteredAndSortedPDNs = useMemo(() => {
-    let filtered = myPDNs.filter(pdn => 
-      pdn.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+
+    let filtered = myPDNs.filter(pdn =>
+      pdn.pdnId.toLowerCase().includes(searchTerm.toLowerCase()) ||
       pdn.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      pdn.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      pdn.assignedTo.toLowerCase().includes(searchTerm.toLowerCase())
+      pdn.currentStatus.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      pdn.currentOwnerFirstName.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return filtered.sort((a, b) => {
-      let aValue: any = a[sortField];
-      let bValue: any = b[sortField];
-      
-      if (sortField === "dateCreated" || sortField === "lastUpdated") {
-        aValue = new Date(aValue).getTime();
-        bValue = new Date(bValue).getTime();
+      let aValue: any;
+      let bValue: any;
+
+      // Map the sort fields to actual API field names
+      switch (sortField) {
+        case "pdnId":
+          aValue = a.pdnId;
+          bValue = b.pdnId;
+          break;
+        case "currentStatus":
+          aValue = a.currentStatus;
+          bValue = b.currentStatus;
+          break;
+        case "currentOwnerFirstName":
+          aValue = a.currentOwnerFirstName;
+          bValue = b.currentOwnerFirstName;
+          break;
+        case "createdDate":
+          aValue = new Date(a.createdDate).getTime();
+          bValue = new Date(b.createdDate).getTime();
+          break;
+        case "updatedDate":
+          aValue = a.updatedDate ? new Date(a.updatedDate).getTime() : 0;
+          bValue = b.updatedDate ? new Date(b.updatedDate).getTime() : 0;
+          break;
+        default:
+          aValue = a[sortField] || "";
+          bValue = b[sortField] || "";
       }
-      
+
       if (sortDirection === "asc") {
         return aValue > bValue ? 1 : -1;
       } else {
         return aValue < bValue ? 1 : -1;
       }
     });
-  }, [searchTerm, sortField, sortDirection]);
+  }, [searchTerm, sortField, sortDirection, myPDNs]);
 
   const SortButton = ({ field, children }: { field: SortField, children: React.ReactNode }) => (
     <Button
@@ -136,74 +208,83 @@ export default function MyPDN() {
         </Button>
       </div>
 
-      <div className="border rounded-lg">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>
-                <SortButton field="id">PDN ID</SortButton>
-              </TableHead>
-              <TableHead>
-                <SortButton field="description">Description</SortButton>
-              </TableHead>
-              <TableHead>
-                <SortButton field="status">Status</SortButton>
-              </TableHead>
-              <TableHead>Priority</TableHead>
-              <TableHead>
-                <SortButton field="assignedTo">Assigned To</SortButton>
-              </TableHead>
-              <TableHead>
-                <SortButton field="dateCreated">Created</SortButton>
-              </TableHead>
-              <TableHead>
-                <SortButton field="lastUpdated">Last Updated</SortButton>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredAndSortedPDNs.map((pdn) => (
-              <TableRow key={pdn.id}>
-                <TableCell>
-                  <Link 
-                    to={`/app/pdn/${pdn.id}`}
-                    className="font-medium text-primary hover:underline"
-                  >
-                    {pdn.id}
-                  </Link>
-                </TableCell>
-                <TableCell className="max-w-xs">
-                  <div className="truncate" title={pdn.description}>
-                    {pdn.description}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge variant={getStatusVariant(pdn.status)}>
-                    {pdn.status}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge variant={getPriorityVariant(pdn.priority)}>
-                    {pdn.priority}
-                  </Badge>
-                </TableCell>
-                <TableCell>{pdn.assignedTo}</TableCell>
-                <TableCell>{pdn.dateCreated}</TableCell>
-                <TableCell>{pdn.lastUpdated}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+      <div className="border rounded-lg shadow-colorful overflow-hidden bg-gradient-card backdrop-blur-sm">
+        {isLoading ? (
+          <div className="flex justify-center items-center py-12">
+            <ClimbingBoxLoader color="#3B82F6" size={15} />
+          </div>
+        ) : (
+          <>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>
+                    <SortButton field="pdnId">PDN ID</SortButton>
+                  </TableHead>
+                  <TableHead>
+                    <SortButton field="description">Description</SortButton>
+                  </TableHead>
+                  <TableHead>
+                    <SortButton field="currentStatus">Status</SortButton>
+                  </TableHead>
+                  <TableHead>Priority</TableHead>
+                  <TableHead>
+                    <SortButton field="currentOwnerFirstName">Assigned To</SortButton>
+                  </TableHead>
+                  <TableHead>
+                    <SortButton field="createdDate">Created</SortButton>
+                  </TableHead>
+                  <TableHead>
+                    <SortButton field="updatedDate">Last Updated</SortButton>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredAndSortedPDNs.map((pdn) => (
+                  <TableRow key={pdn.pdnId}>
+                    <TableCell>
+                      <Link to={`/app/pdn/${pdn.pdnId}`} className="font-medium text-primary hover:underline">
+                        {pdn.pdnId}
+                      </Link>
+                    </TableCell>
+                    <TableCell className="max-w-xs">
+                      <div className="truncate" title={pdn.description}>
+                        {pdn.description}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={getStatusVariant(pdn.currentStatus)}>
+                        {pdn.currentStatus}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {pdn.priority ? (
+                        <Badge variant={getPriorityVariant(pdn.priority)}>
+                          {pdn.priority}
+                        </Badge>
+                      ) : (
+                        '-'
+                      )}
+                    </TableCell>
+                    <TableCell>{pdn.currentOwnerFirstName}</TableCell>
+                    <TableCell>{pdn.createdDate}</TableCell>
+                    <TableCell>{pdn.updatedDate || '-'}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
 
-      {filteredAndSortedPDNs.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">No PDNs found matching your search criteria.</p>
-          <Button asChild className="mt-4">
-            <Link to="/new-pdn">Create Your First PDN</Link>
-          </Button>
-        </div>
-      )}
+            {filteredAndSortedPDNs.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">No PDNs found matching your search criteria.</p>
+                <Button asChild className="mt-4">
+                  <Link to="/new-pdn">Create Your First PDN</Link>
+                </Button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }
