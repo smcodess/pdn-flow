@@ -63,6 +63,11 @@ export function Layout({ onLogout, user }: LayoutProps) {
     }
   };
 
+  const authWorkSpace = ()=>{
+    if(user.role == 'DEVELOPER') return false;
+    else return true;
+  }
+
   // Get user initials for avatar
   const getUserInitials = () => {
     if (user?.firstName) {
@@ -125,12 +130,12 @@ export function Layout({ onLogout, user }: LayoutProps) {
               className="w-auto"
             >
               <TabsList className="grid w-full grid-cols-3 bg-gradient-card shadow-sm">
-                <TabsTrigger
+               {authWorkSpace() &&  <TabsTrigger
                   value="workspace"
                   className="data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground"
                 >
                   My Workspace
-                </TabsTrigger>
+                </TabsTrigger>}
                 <TabsTrigger
                   value="new-pdn"
                   className="data-[state=active]:bg-gradient-accent data-[state=active]:text-accent-foreground"

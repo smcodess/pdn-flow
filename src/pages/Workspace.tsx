@@ -108,7 +108,7 @@ export default function Workspace() {
       return [];
     }
 
-    let filtered = PDNList.filter(
+    const filtered = PDNList.filter(
       (pdn) =>
         pdn.pdnId.toLowerCase().includes(searchTerm.toLowerCase()) ||
         pdn.description.toLowerCase().includes(searchTerm.toLowerCase()) ||

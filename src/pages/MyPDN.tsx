@@ -229,7 +229,7 @@ export default function MyPDN({ user }: MyPDNProps) {
           </div>
         </div>
         <Button asChild variant="gradient">
-          <Link to="/new-pdn">Create New PDN</Link>
+          <Link to="/app/new-pdn">Create New PDN</Link>
         </Button>
       </div>
 

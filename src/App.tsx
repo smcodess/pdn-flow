@@ -194,7 +194,7 @@ const App = () => {
                 path="/"
                 element={
                   isAuthenticated ? (
-                    <Navigate to="/app/workspace" replace />
+                    <Navigate to="/app" replace />
                   ) : (
                     <Index />
                   )
@@ -204,7 +204,7 @@ const App = () => {
                 path="/signup"
                 element={
                   isAuthenticated ? (
-                    <Navigate to="/app/workspace" replace />
+                    <Navigate to="/app" replace />
                   ) : (
                     <AuthPage onLogin={login} />
                   )
