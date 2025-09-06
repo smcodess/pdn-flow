@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,9 +13,16 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Search, ArrowUpDown } from "lucide-react";
 import { sendApiRequest } from "@/lib/utils";
-import { ClimbingBoxLoader } from 'react-spinners';
+import { ClimbingBoxLoader } from "react-spinners";
 
-type SortField = "pdnId" | "description" | "currentStatus" | "createdByFirstName" | "currentOwnerFirstName" | "createdDate" | "workspace";
+type SortField =
+  | "pdnId"
+  | "description"
+  | "currentStatus"
+  | "createdByFirstName"
+  | "currentOwnerFirstName"
+  | "createdDate"
+  | "workspace";
 type SortDirection = "asc" | "desc";
 
 interface PDN {
@@ -49,25 +56,43 @@ export default function Workspace() {
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [PDNList, setPDNList] = useState<PDN[]>([]);
   const [loading, setLoading] = useState(true);
+  const Navigate = useNavigate();
 
+  const BearerToken = localStorage.getItem("token");
+
+  console.log(BearerToken);
   useEffect(() => {
+
     const loadFiles = async () => {
       try {
-        setLoading(true)
-        const response = await sendApiRequest('http://localhost:8080/api/pdn/all', {}, { method: "GET" });
+        setLoading(true);
+        const response = await sendApiRequest(
+          "http://localhost:8080/api/pdn/all",
+          {},
+          {
+            method: "GET",
+          }
+        );
         const data = response.data;
+        
+        if (response.status == 401) {
+          Navigate("/signup");
+        }
+
         setPDNList(data);
-        console.log(data); 
+        console.log(data);
       } catch (err) {
-        console.log(err instanceof Error ? err.message : 'Failed to fetch files')
+        console.log(
+          err instanceof Error ? err.message : "Failed to fetch files"
+        );
         setPDNList([]);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    loadFiles()
-  }, [])
+    loadFiles();
+  }, []);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -79,18 +104,22 @@ export default function Workspace() {
   };
 
   const filteredAndSortedPDNs = useMemo(() => {
-
     if (!Array.isArray(PDNList)) {
       return [];
     }
 
-    let filtered = PDNList.filter(pdn =>
-      pdn.pdnId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      pdn.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      pdn.currentStatus.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      pdn.createdByFirstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      pdn.currentOwnerFirstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      pdn.workspace.toLowerCase().includes(searchTerm.toLowerCase())
+    let filtered = PDNList.filter(
+      (pdn) =>
+        pdn.pdnId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        pdn.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        pdn.currentStatus.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        pdn.createdByFirstName
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        pdn.currentOwnerFirstName
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        pdn.workspace.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return filtered.sort((a, b) => {
@@ -110,7 +139,13 @@ export default function Workspace() {
     });
   }, [PDNList, searchTerm, sortField, sortDirection]);
 
-  const SortButton = ({ field, children }: { field: SortField, children: React.ReactNode }) => (
+  const SortButton = ({
+    field,
+    children,
+  }: {
+    field: SortField;
+    children: React.ReactNode;
+  }) => (
     <Button
       variant="ghost"
       className="h-auto p-0 font-medium"
@@ -125,7 +160,9 @@ export default function Workspace() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">My Workspace</h1>
-        <p className="text-muted-foreground">View and manage all PDNs in your workspace</p>
+        <p className="text-muted-foreground">
+          View and manage all PDNs in your workspace
+        </p>
       </div>
 
       <div className="flex items-center space-x-2">
@@ -160,10 +197,14 @@ export default function Workspace() {
                     <SortButton field="currentStatus">Status</SortButton>
                   </TableHead>
                   <TableHead>
-                    <SortButton field="createdByFirstName">Created By</SortButton>
+                    <SortButton field="createdByFirstName">
+                      Created By
+                    </SortButton>
                   </TableHead>
                   <TableHead>
-                    <SortButton field="currentOwnerFirstName">Assigned To</SortButton>
+                    <SortButton field="currentOwnerFirstName">
+                      Assigned To
+                    </SortButton>
                   </TableHead>
                   <TableHead>
                     <SortButton field="createdDate">Date Created</SortButton>
@@ -210,7 +251,9 @@ export default function Workspace() {
 
       {filteredAndSortedPDNs.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">No PDNs found matching your search criteria.</p>
+          <p className="text-muted-foreground">
+            No PDNs found matching your search criteria.
+          </p>
         </div>
       )}
     </div>

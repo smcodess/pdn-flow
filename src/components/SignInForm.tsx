@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,27 +8,21 @@ import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { sendApiRequest, validateSigninForm } from "@/lib/utils";
 
-const signInSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(1, "Password is required"),
-});
-
 interface SignInFormValues {
-  email: string;
+  empId: number;
   password: string;
 }
 
 interface AuthResponse {
-  success: boolean;
-  user: {
-    id: number;
-    employeeId: string;
-    fullName: string;
-    email: string;
-    department: string;
-  };
-  token?: string;
+  status: number;
   message: string;
+  data: {
+    empId: number;
+    firstName: string;
+    role: string;
+    token?: string;
+    lastName: string;
+  };
 }
 
 interface SignInFormProps {
@@ -47,12 +39,14 @@ export const SignInForm = ({ onSwitchToSignUp, onLogin }: SignInFormProps) => {
     register,
     handleSubmit,
     formState: { errors },
-    setError
+    setError,
   } = useForm<SignInFormValues>();
 
   const onSubmit = async (data: SignInFormValues) => {
     try {
       setIsLoading(true);
+
+      data.empId = Number(data.empId);
 
       const validation = validateSigninForm(data);
 
@@ -63,40 +57,31 @@ export const SignInForm = ({ onSwitchToSignUp, onLogin }: SignInFormProps) => {
         return;
       }
 
-      // const response: AuthResponse = await sendApiRequest(
-      //   'http://localhost:8080/api/auth/signin',
-      //   data,
-      //   { method: "POST" } 
-      // );
+      // console.log(data)
 
-      const response = {
-        success: true,
-        user: {
-          id: 123,
-          employeeId: "2732290",
-          fullName: "Satwik Mishra",
-          email: "mishra.satwik@tcs.com",
-          department: "Developer"
-        },
-        token: "Something",
-        message: "success"
-      };
+      const response: AuthResponse = await sendApiRequest(
+        "http://localhost:8080/api/auth/login",
+        data,
+        { method: "POST" }
+      );
 
-      if (response.success) {
+      console.log(response);
+
+      if (response.message == "Success") {
         onLogin(response);
         toast({
           title: "Welcome back!",
           description: `Successfully signed in to JTRAC.`,
         });
-        navigate('/app/workspace');
+        navigate("/app/");
       } else {
         throw new Error(response.message);
       }
-
     } catch (error) {
       toast({
         title: "Sign in failed",
-        description: error.message || "Please check your credentials and try again.",
+        description:
+          error.message || "Please check your credentials and try again.",
         variant: "destructive",
       });
     } finally {
@@ -108,26 +93,24 @@ export const SignInForm = ({ onSwitchToSignUp, onLogin }: SignInFormProps) => {
     <div className="space-y-6">
       <div className="text-center space-y-2">
         <h2 className="text-3xl font-bold">Welcome Back</h2>
-        <p className="text-muted-foreground">
-          Sign in to your JTRAC account
-        </p>
+        <p className="text-muted-foreground">Sign in to your myTRAC account</p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="signin-email">Email Address</Label>
+          <Label htmlFor="signin-empId">Employee ID</Label>
           <div className="relative">
             <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
-              id="signin-email"
-              type="email"
-              placeholder="john.doe@company.com"
+              id="signin-empId"
+              type="number"
+              placeholder="Employee ID"
               className="pl-10"
-              {...register("email")}
+              {...register("empId")}
             />
           </div>
-          {errors.email && (
-            <p className="text-xs text-destructive">{errors.email.message}</p>
+          {errors.empId && (
+            <p className="text-xs text-destructive">{errors.empId.message}</p>
           )}
         </div>
 
@@ -155,7 +138,9 @@ export const SignInForm = ({ onSwitchToSignUp, onLogin }: SignInFormProps) => {
             </button>
           </div>
           {errors.password && (
-            <p className="text-xs text-destructive">{errors.password.message}</p>
+            <p className="text-xs text-destructive">
+              {errors.password.message}
+            </p>
           )}
         </div>
 

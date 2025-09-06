@@ -6,16 +6,15 @@ import { SignUpForm } from "@/components/SignUpForm";
 import "./AuthPage.css";
 
 interface AuthResponse {
-    success: boolean;
-    user: {
-        id: number;
-        employeeId: string;
-        fullName: string;
-        email: string;
-        department: string;
-    };
+  status: number;
+  message: string;
+  data: {
+    empId: number;
+    firstName: string;
+    role: string;
     token?: string;
-    message: string;
+    lastName: string
+  };
 }
 
 interface AuthPageProps {
@@ -56,7 +55,7 @@ export const AuthPage = ({ onLogin }: AuthPageProps) => {
                     </div>
 
                     <h1 className="text-6xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
-                        JTRAC
+                        myTRAC
                     </h1>
                     <p className="text-xl text-muted-foreground mb-8 max-w-lg">
                         Join thousands of professionals managing their workflows efficiently.

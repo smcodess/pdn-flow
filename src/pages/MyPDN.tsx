@@ -15,32 +15,37 @@ import { Search, ArrowUpDown } from "lucide-react";
 import { sendApiRequest } from "@/lib/utils";
 import { ClimbingBoxLoader } from "react-spinners";
 
-type SortField = "pdnId" | "description" | "currentStatus" | "currentOwnerFirstName" | "createdDate" | "workspace" | "updatedDate";
+type SortField =
+  | "pdnId"
+  | "description"
+  | "currentStatus"
+  | "currentOwnerFirstName"
+  | "createdDate"
+  | "workspace"
+  | "updatedDate";
 type SortDirection = "asc" | "desc";
 
 interface MyPDNProps {
   user: {
-    id: number;
-    employeeId: string;
-    fullName: string;
-    email: string;
-    department: string;
+    empId: number;
+    firstName: string;
+    role: string;
+    token?: string;
+    lastName: string;
   } | null;
 }
 
 interface MyPDN {
   pdnId: string;
   description: string;
-  currentStatus: "Open" | "In Progress" | "Resolved" | "Closed";
+  currentStatus: string;
   createdByFirstName: string;
   currentOwnerFirstName: string;
   createdDate: string;
   workspace: string;
-  priority?: string;        // Add this
-  updatedDate?: string;     // Add this
+  priority?: string;
+  updatedDate?: string;
 }
-
-const myPDNs: MyPDN[] = [];
 
 const getStatusVariant = (status: string) => {
   switch (status) {
@@ -87,34 +92,45 @@ export default function MyPDN({ user }: MyPDNProps) {
 
   useEffect(() => {
     const fetchUserPDNs = async () => {
-      if (!user?.id) return;
+      if (!user?.empId) return;
 
       try {
         setIsLoading(true);
 
-        const response = await sendApiRequest(
-          `http://localhost:8080/api/pdn/all/createdBy/${user.employeeId}`,
-          null,
-          { method: "GET" }
-        );
+        // const response = await sendApiRequest(
+        //   `http://localhost:8080/api/pdn/all/createdBy/${user.empId}`,
+        //   null,
+        //   { method: "GET" }
+        // );
 
-        console.log(response);
+        const response = {
+          data: [{
+            pdnId: "IM345",
+            description: "Something",
+            currentStatus: "Raised",
+            createdByFirstName: "Satwik",
+            currentOwnerFirstName: "Satwik",
+            createdDate: "06/09/2025",
+            workspace: "IM"
+          }]
+        }
+
+        console.log(response.data);
 
         if (response.data && response.data.length > 0) {
           setMyPDNs(response.data);
         } else {
-          setMyPDNs([]); // Set empty array if no data
+          setMyPDNs([]);
         }
       } catch (error) {
-        console.error('Failed to fetch PDNs:', error);
+        console.error("Failed to fetch PDNs:", error);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchUserPDNs();
-  }, [user?.employeeId]);
-
+  }, [user?.empId]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -126,19 +142,20 @@ export default function MyPDN({ user }: MyPDNProps) {
   };
 
   const filteredAndSortedPDNs = useMemo(() => {
-
-    let filtered = myPDNs.filter(pdn =>
-      pdn.pdnId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      pdn.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      pdn.currentStatus.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      pdn.currentOwnerFirstName.toLowerCase().includes(searchTerm.toLowerCase())
+    let filtered = myPDNs.filter(
+      (pdn) =>
+        pdn.pdnId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        pdn.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        pdn.currentStatus.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        pdn.currentOwnerFirstName
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
     );
 
     return filtered.sort((a, b) => {
       let aValue: any;
       let bValue: any;
 
-      // Map the sort fields to actual API field names
       switch (sortField) {
         case "pdnId":
           aValue = a.pdnId;
@@ -173,7 +190,13 @@ export default function MyPDN({ user }: MyPDNProps) {
     });
   }, [searchTerm, sortField, sortDirection, myPDNs]);
 
-  const SortButton = ({ field, children }: { field: SortField, children: React.ReactNode }) => (
+  const SortButton = ({
+    field,
+    children,
+  }: {
+    field: SortField;
+    children: React.ReactNode;
+  }) => (
     <Button
       variant="ghost"
       className="h-auto p-0 font-medium"
@@ -188,7 +211,9 @@ export default function MyPDN({ user }: MyPDNProps) {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">My PDNs</h1>
-        <p className="text-muted-foreground">Manage and track all PDNs you have created</p>
+        <p className="text-muted-foreground">
+          Manage and track all PDNs you have created
+        </p>
       </div>
 
       <div className="flex items-center justify-between">
@@ -229,7 +254,9 @@ export default function MyPDN({ user }: MyPDNProps) {
                   </TableHead>
                   <TableHead>Priority</TableHead>
                   <TableHead>
-                    <SortButton field="currentOwnerFirstName">Assigned To</SortButton>
+                    <SortButton field="currentOwnerFirstName">
+                      Assigned To
+                    </SortButton>
                   </TableHead>
                   <TableHead>
                     <SortButton field="createdDate">Created</SortButton>
@@ -243,7 +270,10 @@ export default function MyPDN({ user }: MyPDNProps) {
                 {filteredAndSortedPDNs.map((pdn) => (
                   <TableRow key={pdn.pdnId}>
                     <TableCell>
-                      <Link to={`/app/pdn/${pdn.pdnId}`} className="font-medium text-primary hover:underline">
+                      <Link
+                        to={`/app/pdn/${pdn.pdnId}`}
+                        className="font-medium text-primary hover:underline"
+                      >
                         {pdn.pdnId}
                       </Link>
                     </TableCell>
@@ -263,12 +293,12 @@ export default function MyPDN({ user }: MyPDNProps) {
                           {pdn.priority}
                         </Badge>
                       ) : (
-                        '-'
+                        "-"
                       )}
                     </TableCell>
                     <TableCell>{pdn.currentOwnerFirstName}</TableCell>
                     <TableCell>{pdn.createdDate}</TableCell>
-                    <TableCell>{pdn.updatedDate || '-'}</TableCell>
+                    <TableCell>{pdn.updatedDate || "-"}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -276,7 +306,9 @@ export default function MyPDN({ user }: MyPDNProps) {
 
             {filteredAndSortedPDNs.length === 0 && (
               <div className="text-center py-12">
-                <p className="text-muted-foreground">No PDNs found matching your search criteria.</p>
+                <p className="text-muted-foreground">
+                  No PDNs found matching your search criteria.
+                </p>
                 <Button asChild className="mt-4">
                   <Link to="/new-pdn">Create Your First PDN</Link>
                 </Button>

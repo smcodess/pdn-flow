@@ -40,9 +40,9 @@ export default function NewPDN() {
       problemSource: "",
       problemId: "",
       workspace: "",
-      module: "",
+      module: "Something",
       subModule: "",
-      product: "",
+      product: "PL",
       impactedArea: "",
       component: ""
     }
@@ -67,6 +67,8 @@ export default function NewPDN() {
         createdBy: 2732290
       };
 
+      console.log(requestData);
+
       const response = await sendApiRequest('http://localhost:8080/api/pdn/create', requestData, { method: "POST" });
 
       setCreatedPDN(response);
@@ -74,11 +76,12 @@ export default function NewPDN() {
 
       toast({
         title: "PDN Created Successfully",
-        description: `PDN ${response.id} has been created and submitted for review.`,
+        description: `PDN ${response.data} has been created and submitted for review.`,
+        className:"bg-green-400"
       });
 
-      navigate(`/pdn/PDN-002`);
-      // navigate(`/pdn/${response.id}`);
+      console.log(response.data);
+      navigate(`/app/pdn/${response.data}`); 
 
     } catch (error) {
       toast({
@@ -97,6 +100,7 @@ export default function NewPDN() {
     toast({
       title: "Form Reset",
       description: "All form fields have been cleared.",
+      className:"bg-green-400"
     });
   };
 

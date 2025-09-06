@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,34 +9,26 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  User,
-  LogOut,
-  Menu,
-  Moon,
-  Sun,
-  GitBranch,
-  Search
-} from "lucide-react";
+import { User, LogOut, Menu, Moon, Sun, GitBranch, Search } from "lucide-react";
 import { useTheme } from "@/providers/ThemeProvider";
-import { sendApiRequest } from "@/lib/utils";
+import { jwtDecode } from "jwt-decode";
 
+const gitRepositories = ["All-GIT", "IM-GIT", "PL-GIT", "DELL-GIT"];
 
-const gitRepositories = ["IM-GIT", "PL-GIT", "DELL-GIT"];
-
-export async function fetchFiles(gitFetchURL: string): Promise<any[]> {
-  try {
-    const data = await sendApiRequest(gitFetchURL, {}, { method: 'GET' })
-    return data
-  } catch (error) {
-    console.error('Failed to fetch files:', error)
-    throw error
-  }
+interface LayoutProps {
+  onLogout?: () => void;
+  user?: {
+    empId: number;
+    firstName: string;
+    role: string;
+    token?: string;
+    lastName: string;
+  } | null;
 }
 
-export function Layout() {
+export function Layout({ onLogout, user }: LayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { setTheme, theme } = useTheme();
@@ -65,6 +57,25 @@ export function Layout() {
     }
   };
 
+  const handleLogout = () => {
+    if (onLogout) {
+      onLogout();
+    }
+  };
+
+  // Get user initials for avatar
+  const getUserInitials = () => {
+    if (user?.firstName) {
+      return user.firstName
+        .split(" ")
+        .map((name) => name.charAt(0))
+        .join("")
+        .toUpperCase()
+        .slice(0, 2);
+    }
+    return "U";
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
       {/* Header */}
@@ -79,7 +90,9 @@ export function Layout() {
             </SheetTrigger>
             <SheetContent side="left" className="w-64 p-0">
               <div className="p-4">
-                <h3 className="font-semibold text-sm text-muted-foreground mb-4">Git Repositories</h3>
+                <h3 className="font-semibold text-sm text-muted-foreground mb-4">
+                  Git Repositories
+                </h3>
                 <div className="space-y-2">
                   {gitRepositories.map((repo) => (
                     <Link
@@ -99,16 +112,37 @@ export function Layout() {
 
           {/* Logo */}
           <div className="flex items-center space-x-4">
-            <h1 className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">JTRAC</h1>
+            <h1 className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+              myTRAC
+            </h1>
           </div>
 
           {/* Navigation Tabs */}
           <div className="flex-1 flex justify-center">
-            <Tabs value={getActiveTab()} onValueChange={handleTabChange} className="w-auto">
+            <Tabs
+              value={getActiveTab()}
+              onValueChange={handleTabChange}
+              className="w-auto"
+            >
               <TabsList className="grid w-full grid-cols-3 bg-gradient-card shadow-sm">
-                <TabsTrigger value="workspace" className="data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground">My Workspace</TabsTrigger>
-                <TabsTrigger value="new-pdn" className="data-[state=active]:bg-gradient-accent data-[state=active]:text-accent-foreground">New PDN</TabsTrigger>
-                <TabsTrigger value="my-pdn" className="data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground">My PDN</TabsTrigger>
+                <TabsTrigger
+                  value="workspace"
+                  className="data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground"
+                >
+                  My Workspace
+                </TabsTrigger>
+                <TabsTrigger
+                  value="new-pdn"
+                  className="data-[state=active]:bg-gradient-accent data-[state=active]:text-accent-foreground"
+                >
+                  New PDN
+                </TabsTrigger>
+                <TabsTrigger
+                  value="my-pdn"
+                  className="data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground"
+                >
+                  My PDN
+                </TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
@@ -127,19 +161,43 @@ export function Layout() {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full hover:bg-gradient-accent hover:text-accent-foreground">
+                <Button
+                  variant="ghost"
+                  className="relative h-8 w-8 rounded-full hover:bg-gradient-accent hover:text-accent-foreground"
+                >
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src="/placeholder.svg" alt="User" />
-                    <AvatarFallback className="bg-gradient-primary text-primary-foreground">JD</AvatarFallback>
+                    <AvatarImage
+                      src="/placeholder.svg"
+                      alt={user?.firstName || "User"}
+                    />
+                    <AvatarFallback className="bg-gradient-primary text-primary-foreground">
+                      {getUserInitials()}
+                    </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 bg-gradient-card shadow-colorful" align="end" forceMount>
+              <DropdownMenuContent
+                className="w-56 bg-gradient-card shadow-colorful"
+                align="end"
+                forceMount
+              >
+                {user && (
+                  <div className="px-3 py-2 border-b">
+                    <p className="text-sm font-medium">{user.firstName}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {user.empId}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{user.role}</p>
+                  </div>
+                )}
                 <DropdownMenuItem className="cursor-pointer hover:bg-gradient-primary hover:text-primary-foreground">
                   <User className="mr-2 h-4 w-4" />
                   Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer hover:bg-gradient-accent hover:text-accent-foreground">
+                <DropdownMenuItem
+                  className="cursor-pointer hover:bg-gradient-accent hover:text-accent-foreground"
+                  onClick={handleLogout}
+                >
                   <LogOut className="mr-2 h-4 w-4" />
                   Logout
                 </DropdownMenuItem>
@@ -155,9 +213,14 @@ export function Layout() {
           <div className="p-4">
             <div className="flex items-center space-x-2 mb-4">
               <Search className="h-4 w-4 text-primary" />
-              <Input placeholder="Search repositories..." className="h-8 border-primary/20 focus:border-primary" />
+              <Input
+                placeholder="Search repositories..."
+                className="h-8 border-primary/20 focus:border-primary"
+              />
             </div>
-            <h3 className="font-semibold text-sm bg-gradient-accent bg-clip-text text-transparent mb-4">Git Repositories</h3>
+            <h3 className="font-semibold text-sm bg-gradient-accent bg-clip-text text-transparent mb-4">
+              Git Repositories
+            </h3>
             <div className="space-y-2">
               {gitRepositories.map((repo) => (
                 <Link

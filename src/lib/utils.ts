@@ -4,8 +4,7 @@ import { twMerge } from "tailwind-merge";
 interface SignupFormValues {
   employeeId: string;
   fullName: string;
-  email: string;
-  department: string;
+  role: string;
   password: string;
   confirmPassword: string;
 }
@@ -27,12 +26,13 @@ export async function sendApiRequest(
   let body: FormData | string | undefined;
   let requestHeaders = { ...headers };
 
-  // Handle different data types
+  const token = localStorage.getItem("token");
+  if (token) requestHeaders["Authorization"] = `Bearer ${token}`;
+
   if (formData instanceof FormData) {
     body = formData;
-    // Don't set Content-Type for FormData, browser will set it with boundary
   } else if (typeof formData === "string") {
-    body = formData;
+    body = formData;  
     requestHeaders["Content-Type"] =
       requestHeaders["Content-Type"] || "text/plain";
   } else if (formData && typeof formData === "object") {
@@ -41,6 +41,8 @@ export async function sendApiRequest(
       requestHeaders["Content-Type"] || "application/json";
   }
 
+  console.log(requestHeaders);
+  console.log(body);
   try {
     const response = await fetch(url, {
       method,
@@ -65,7 +67,6 @@ export async function sendApiRequest(
   }
 }
 
-// utils/validation.ts
 export const validateSignupForm = (data: SignupFormValues) => {
   const errors: Partial<Record<keyof SignupFormValues, string>> = {};
 
@@ -77,12 +78,8 @@ export const validateSignupForm = (data: SignupFormValues) => {
     errors.fullName = "Full name must be at least 2 characters";
   }
 
-  if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-    errors.email = "Please enter a valid email address";
-  }
-
-  if (!data.department || data.department.length < 1) {
-    errors.department = "Please select a department";
+  if (!data.role || data.role.length < 1) {
+    errors.role = "Please select a role";
   }
 
   if (!data.password || data.password.length < 8) {
@@ -103,16 +100,11 @@ export const validateSignupForm = (data: SignupFormValues) => {
   };
 };
 
-// utils/validation.ts (add this function)
 export const validateSigninForm = (data: {
-  email: string;
+  empId: number;
   password: string;
 }) => {
   const errors: Partial<Record<keyof typeof data, string>> = {};
-
-  if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-    errors.email = "Please enter a valid email address";
-  }
 
   if (!data.password || data.password.length < 1) {
     errors.password = "Password is required";

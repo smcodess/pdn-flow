@@ -23,7 +23,7 @@ const Index = () => {
         </div>
         
         <h1 className="text-6xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
-          JTRAC
+          myTRAC
         </h1>
         <p className="text-xl text-muted-foreground mb-12 max-w-md mx-auto">
           Professional workspace management for modern teams. Track, manage, and collaborate efficiently.
