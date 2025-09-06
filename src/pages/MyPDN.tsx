@@ -97,23 +97,23 @@ export default function MyPDN({ user }: MyPDNProps) {
       try {
         setIsLoading(true);
 
-        // const response = await sendApiRequest(
-        //   `http://localhost:8080/api/pdn/all/createdBy/${user.empId}`,
-        //   null,
-        //   { method: "GET" }
-        // );
+        const response = await sendApiRequest(
+          `http://localhost:8080/api/pdn/all/createdBy/${user.empId}`,
+          null,
+          { method: "GET" }
+        );
 
-        const response = {
-          data: [{
-            pdnId: "IM345",
-            description: "Something",
-            currentStatus: "Raised",
-            createdByFirstName: "Satwik",
-            currentOwnerFirstName: "Satwik",
-            createdDate: "06/09/2025",
-            workspace: "IM"
-          }]
-        }
+        // const response = {
+        //   data: [{
+        //     pdnId: "IM345",
+        //     description: "Something",
+        //     currentStatus: "Raised",
+        //     createdByFirstName: "Satwik",
+        //     currentOwnerFirstName: "Satwik",
+        //     createdDate: "06/09/2025",
+        //     workspace: "IM"
+        //   }]
+        // }
 
         console.log(response.data);
 

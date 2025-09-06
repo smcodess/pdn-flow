@@ -136,7 +136,6 @@ export default function GitPDN() {
 
   const filteredAndSortedPDNs = useMemo(() => {
     let filtered = gitPDNs.filter((pdn) => {
-      // Text search
       const matchesSearch =
         pdn.pdnId.toLowerCase().includes(searchTerm.toLowerCase()) ||
         pdn.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -145,15 +144,12 @@ export default function GitPDN() {
           .toLowerCase()
           .includes(searchTerm.toLowerCase());
 
-      // Creator filter
       const matchesCreator =
         !filters.createdBy || pdn.createdByFirstName === filters.createdBy;
 
-      // Status filter
       const matchesStatus =
         !filters.status || pdn.currentStatus === filters.status;
 
-      // Date range filter
       const pdnDate = new Date(pdn.createdDate);
       const matchesDateFrom =
         !filters.dateFrom || pdnDate >= new Date(filters.dateFrom);

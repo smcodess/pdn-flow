@@ -73,7 +73,7 @@ export const SignInForm = ({ onSwitchToSignUp, onLogin }: SignInFormProps) => {
           title: "Welcome back!",
           description: `Successfully signed in to JTRAC.`,
         });
-        navigate("/app/");
+        navigate("/app/git/All-GIT");
       } else {
         throw new Error(response.message);
       }

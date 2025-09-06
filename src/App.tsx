@@ -60,13 +60,8 @@ const tokenUtils = {
 };
 
 const App = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(true);
-  const [user, setUser] = useState<AuthResponse["data"] | null>({
-    empId: 2732290,
-    firstName: "Satwik",
-    lastName: "Mishra",
-    role: "Admin"
-  });
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [user, setUser] = useState<AuthResponse["data"] | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
@@ -74,10 +69,10 @@ const App = () => {
       try {
         const token = tokenUtils.getToken();
 
-        console.log("tiqwuturuiqwtrqwu" + token);
+        // console.log("tiqwuturuiqwtrqwu" + token);
 
         if (!token || !tokenUtils.isValidTokenFormat(token)) {
-          setIsAuthenticated(true);
+          setIsAuthenticated(false);
           setIsInitializing(false);
           return;
         }

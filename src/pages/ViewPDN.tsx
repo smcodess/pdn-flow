@@ -134,76 +134,30 @@ export default function ViewPDN() {
   useEffect(() => {
     const loadFiles = async () => {
       try {
-        // const response = await sendApiRequest(
-        //   `http://localhost:8080/api/pdn/all/pdnId/${id}`,
-        //   {},
-        //   { method: "GET" }
-        // );
-
-        const response = {
-          status: 200,
-          message: "Success",
-          data: [
-            {
-              pdnId: "IM350",
-              description: "Login authentication issue with OAuth integration",
-              currentStatus: "Raised",
-              createdByFirstName: "Satwik",
-              currentOwnerFirstName: "Sudipto",
-              createdDate: "2024-01-15T10:30:00Z",
-              workspace: "Frontend Development",
-              priority: "High",
-              updatedDate: "2024-01-17T14:20:00Z",
-              problemId: "DEF-4721",
-              impactedArea: "Authentication Module",
-              module: "Authentication",
-              subModule: "OAuth",
-              product: "Web Application",
-            },
-          ],
-        };
+        const response = await sendApiRequest(
+          `http://localhost:8080/api/pdn/all/pdnId/${id}`,
+          {},
+          { method: "GET" }
+        );
 
         if (response.status == 401) {
           Navigate("/signup");
         }
 
         console.log("PDN Details:", response);
-        setpdnDetails(response.data[0]);
+        setpdnDetails(response.data);
       } catch (err) {
         console.log(
           err instanceof Error ? err.message : "Failed to fetch PDN details"
         );
       }
 
-      // Component Details
       try {
-        // const response = await sendApiRequest(
-        //   `http://localhost:8080/api/pdn/component/${id}`,
-        //   {},
-        //   { method: "GET" }
-        // );
-
-        const response = {
-          status: 200,
-          message: "Success",
-          data: [
-            {
-              component:
-                "Base_Source_Code/JDK17UPGRADE/GradleBuild/BaNCSDomainData/src/main/java/com/tcs/bancs/insurance/core/acc/dao/GSTTaxDataAccess.java\nBase_Source_Code/JDK17UPGRADE/GradleBuild/BaNCSInterface/src/main/java/com/tcs/bancs/insurance/rein/service/consumer/impl/AccountPostingTransfer.java\nBase_Source_Code/CUSTOMER_LAYER/CUST_LAYER_IL/Database/HLTH_PRD/8001_Product_movement/29082025/Script for Multi City GST Payment Purpose CR_REF_CODES.sql",
-              createdDate: "2025-09-01T15:51:15.331996",
-              updatedDate: "2025-09-01T15:51:15.331996",
-              createdBy: 2732290,
-              pdnId: "IM356",
-            },
-            {
-              component: "comp",
-              createdDate: "2025-09-01T15:55:50.280639",
-              updatedDate: "2025-09-01T15:55:50.280639",
-              createdBy: 2779524,
-              pdnId: "IM356",
-            },
-          ],
-        };
+        const response = await sendApiRequest(
+          `http://localhost:8080/api/pdn/component/${id}`,
+          {},
+          { method: "GET" }
+        );
 
         console.log("Component Details:", response);
         setcomponentDetails(response);
@@ -248,7 +202,6 @@ export default function ViewPDN() {
     };
 
     console.log(updateInfo);
-    // console.log(updateData);
 
     try {
       const formData = new FormData();
@@ -263,11 +216,11 @@ export default function ViewPDN() {
 
       console.log(formData);
 
-      // await sendApiRequest(
-      //   `http://localhost:8080/api/pdn/update/${id}`,
-      //   formData,
-      //   { method: "POST" }
-      // );
+      await sendApiRequest(
+        `http://localhost:8080/api/pdn/update/${id}`,
+        formData,
+        { method: "POST" }
+      );
 
       toast({
         title: "Update Added",
@@ -292,27 +245,11 @@ export default function ViewPDN() {
 
   const fetchTrackingData = async () => {
     try {
-      // const response = await sendApiRequest(
-      //   `http://localhost:8080/api/pdn/tracking/${id}`,
-      //   {},
-      //   { method: "GET" }
-      // );
-
-      const response = {
-        status: 200,
-        message: "Something",
-        data: [
-          {
-            createdDate: "04/09/2025",
-            details: "",
-            eventCode: "UPDATE",
-            eventType: "",
-            updatedDate: "",
-            empId: 2732290,
-            pdnId: "IM921",
-          },
-        ],
-      };
+      const response = await sendApiRequest(
+        `http://localhost:8080/api/pdn/tracking/${id}`,
+        {},
+        { method: "GET" }
+      );
 
       console.log("Tracking Details:", response);
       settrackingDetails(response);
@@ -522,7 +459,7 @@ export default function ViewPDN() {
                 {pdnDetails.description}
               </p>
             </div>
-            
+
             {/* Components Affected */}
             <>
               <div className="flex items-center justify-between mb-2">
@@ -538,7 +475,7 @@ export default function ViewPDN() {
                 </Button>
               </div>
 
-              <div className="max-h-60 overflow-y-auto space-y-3 max-w-4xl bg-white scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400 scrollbar-thumb-rounded-full scrollbar-track-rounded-full">
+              <div className="max-h-60 overflow-y-auto scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400 scrollbar-thumb-rounded-full scrollbar-track-rounded-full">
                 {componentDetails?.data?.map((component, componentIndex) => (
                   <code
                     key={componentIndex}
@@ -547,6 +484,10 @@ export default function ViewPDN() {
                     {component.component.split("\n").map((line) => line.trim()).join("\n")}
                   </code>
                 ))}
+
+                {componentDetails?.data?.length > 0 && newComponents.length > 0 && (
+                  <div className="my-1 border-t border-gray-200"></div>
+                )}
 
                 {newComponents.map((component, index) => (
                   <code
